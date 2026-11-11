@@ -151,12 +151,11 @@ export const liveProducts = () => {
   return {
     $or: [
       { status: "published" as const },
-      { status: "scheduled" as const, publishAt: {$lte: new Date() } },
+      { status: "scheduled" as const, publishAt: { $lte: new Date() } },
     ],
   };
 };
 
-export const Product = model<IProduct>("Product", productSchema)
-
+export const Product = model<IProduct>("Product", productSchema);
 
 // STEP 9: Create some web-friendly names {slugs} -> server/src/utils/slugify.ts
