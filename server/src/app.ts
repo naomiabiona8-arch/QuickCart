@@ -1,6 +1,9 @@
 // "not found" and error handlers.
 // It does not start listening; server.ts does that
 
+import dns from "node:dns";
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
 import express from 'express';
 import cors from "cors";
 import { env } from "./config/env";

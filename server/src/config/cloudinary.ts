@@ -72,7 +72,7 @@ export const uploadedPhotoId = (url: string) => {
 
 // Sends a photo (the file's bytes) to cloudinary and returns its public id
 
-export const uploadedPhoto = (bytes: Buffer, publicId: string) => {
+export const uploadPhoto = (bytes: Buffer, publicId: string) => {
   return new Promise<string>((resolve, reject) => {
     const upload = cloudinary.uploader.upload_stream(
       { public_id: publicId, overwrite: true, resource_type: "image" },
