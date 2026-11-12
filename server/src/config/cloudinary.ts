@@ -20,7 +20,6 @@ export const isCloudinaryReady = Boolean(
 export const CLOUDINARY_MISSING =
   "Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET to server/.env.";
 
-  
 cloudinary.config({
   cloud_name: env.cloudinaryCloudName,
   api_key: env.cloudinaryApiKey,
@@ -101,4 +100,37 @@ export const deleteAllUploadedPhotos = async () => {
   await cloudinary.api
     .delete_resources_by_prefix(`${UPLOAD_FOLDER}/`)
     .catch(() => {});
+};
+
+// List the names (public ids) of all demo product photos on cloudinary,
+// e.g ["quickcart/products/smart-wtch-ultra-1",...]. Admin uploads are left out.
+// cloudinary sends at most 500 per page,so we keep asking for the next page until there is none.
+// Empty list when cloudinary isn't set up (the products re then saved without Photos.)
+
+export const listProductPhotoIds = async (): Promise<string[]> => {
+  if (!isCloudinaryReady) {
+    return [];
+  }
+
+  const ids: string[] = [];
+  let nextCursor: string | undefined = undefined;
+
+  do {
+    const page = await cloudinary.api.resources({
+      type: "upload",
+      prefix: `${PHOTO_FOLDER}/`,
+      max_results: 500,
+      next_cursor: nextCursor,
+    });
+
+    for (const photo of page.resources) {
+      ids.push(photo.public_id);
+    }
+
+    nextCursor = page.next_cursor; // undefined on the last page ,which ends the loop
+  } while (nextCursor);
+
+  return ids.filter((id) => {
+    return !id.startsWith(`${PHOTO_FOLDER}/`);
+  });
 };
