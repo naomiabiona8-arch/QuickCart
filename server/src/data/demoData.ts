@@ -6,6 +6,7 @@ import { PHOTO_FOLDER, photoUri } from "../config/cloudinary";
 import { categories } from "./categories";
 import { products, SeedProduct } from "./products";
 import { slugify } from "../utils/slugify";
+import { users } from "./users";
 
 // STEP 12: Put the demo data in the database(part 1: shape the records)
 // The data files use slugs and simple names; the database needs real ids,full photo addresses and every field the model expects. these functions do the translation.
@@ -133,4 +134,10 @@ export const demoProducts = (
 
     return buildProduct(item, categoryId, photoIds);
   });
+};
+// ------Users------------------------
+// users.ts ia already shaped like the user model.Passwords are hashed by the model when seed.ts saves them
+
+export const demoUsers = () => {
+  return users;
 };

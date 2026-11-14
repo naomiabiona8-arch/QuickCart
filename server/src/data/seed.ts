@@ -2,18 +2,19 @@
 // fills the database with the demodata : npm run seed
 // Running it again wipes the demo collections and starts fresh, so its always safe to re-run
 
-
 import dns from "node:dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 import mongoose, { Types } from "mongoose";
 import { Category } from "../models/Category";
 import { Product } from "../models/Product";
-import { demoCategories, demoProducts } from "./demoData";
+import { demoCategories, demoProducts, demoUsers } from "./demoData";
 import { listProductPhotoIds } from "../config/cloudinary";
 import { products } from "./products";
 import { categories } from "./categories";
 import { connectDB } from "../config/database";
+import { User } from "../models/User";
+import { users } from "./users";
 
 // STEP 13:The seed command
 // seedDatabase() does the work and is exported, so the demo panel can reuse it.
@@ -21,7 +22,11 @@ import { connectDB } from "../config/database";
 
 export const seedDatabase = async () => {
   // 1. Empty th collections (both at the same time with Promise.all)
-  await Promise.all([Category.deleteMany({}), Product.deleteMany({})]);
+  await Promise.all([
+    Category.deleteMany({}),
+    Product.deleteMany({}),
+    User.deleteMany({}),
+  ]);
 
   //   2. Save the categories, then remember each ones id by slug: "electronics" -> objectId(''')
 
@@ -80,10 +85,16 @@ export const seedDatabase = async () => {
     }),
   );
 
-  //   6. A summary for whoever ran the seed
+  // 6. Save the demo users.
+  // User.create (NOT insertMany): only create/save runs thre models
+  // Pre ("save") hook,which hashes the passwords. inserMany would store them as plain text!
+  const savedUsers = await User.create(demoUsers());
+
+  //   7. A summary for whoever ran the seed
   return {
     categories: savedCategories.length,
     products: saveProducts.length,
+    users: savedUsers.length,
     withoutPhotos: saveProducts
       .filter((product) => {
         return product.images.length === 0;
@@ -103,7 +114,7 @@ const runSeed = async () => {
     const result = await seedDatabase();
 
     console.log(
-      `Seeded ${result.categories} categories and ${result.products} products`,
+      `Seeded ${result.categories} categories and ${result.products} products and ${result.users} users`,
     );
   } catch (error) {
     console.error("Seed failed:", (error as Error).message);
