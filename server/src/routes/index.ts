@@ -1,8 +1,12 @@
 // routes/index.ts
 // Joins all the route files together app.ts puts these under /api
 
+import dns from "node:dns";
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
 import { Router } from "express";
 import categoryRoutes from "./categoryRoutes";
+import productRoutes from "./productRoutes";
 
 // STEP 5: Joins the routes and add a health check
 // One router joins all the route files. .app.ts mounts it at/api, so a route like e.g "/products" becomes /api/products
@@ -15,6 +19,7 @@ router.get("health", (_req, res) => {
 });
 
 router.use("/categories", categoryRoutes); // api/categories
+router.use("/products", productRoutes); //api/products...
 
 export default router;
 
