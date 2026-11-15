@@ -9,6 +9,7 @@ import categoryRoutes from "./categoryRoutes";
 import productRoutes from "./productRoutes";
 import accountRoutes from "./accountRoutes";
 import promoRoutes from "./promoRoutes";
+import orderRoutes from "./orderRoutes";
 
 // STEP 5: Joins the routes and add a health check
 // One router joins all the route files. .app.ts mounts it at/api, so a route like e.g "/products" becomes /api/products
@@ -24,6 +25,7 @@ router.use("/categories", categoryRoutes); // api/categories
 router.use("/products", productRoutes); //api/products...
 router.use("/account", accountRoutes); // /api/account...
 router.use("/promo-codes", promoRoutes); // /api/promo-codes...
+router.use("/orders", orderRoutes); // /api/orders...
 export default router;
 
 // Next: STEP 6 (start the server) -> server/src/server.ts
