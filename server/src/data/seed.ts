@@ -14,7 +14,8 @@ import { products } from "./products";
 import { categories } from "./categories";
 import { connectDB } from "../config/database";
 import { User } from "../models/User";
-import { users } from "./users";
+import { PromoCode } from "../models/PromoCode";
+import { promoCodes } from "./promoCodes";
 
 // STEP 13:The seed command
 // seedDatabase() does the work and is exported, so the demo panel can reuse it.
@@ -26,6 +27,7 @@ export const seedDatabase = async () => {
     Category.deleteMany({}),
     Product.deleteMany({}),
     User.deleteMany({}),
+    PromoCode.deleteMany({}),
   ]);
 
   //   2. Save the categories, then remember each ones id by slug: "electronics" -> objectId(''')
@@ -90,11 +92,15 @@ export const seedDatabase = async () => {
   // Pre ("save") hook,which hashes the passwords. inserMany would store them as plain text!
   const savedUsers = await User.create(demoUsers());
 
-  //   7. A summary for whoever ran the seed
+  // 7. Save the promo codes (insertMany is fine here: promo codes have no save hooks)
+  const savedPromoCodes = await PromoCode.insertMany(promoCodes);
+
+  //   8. A summary for whoever ran the seed
   return {
     categories: savedCategories.length,
     products: saveProducts.length,
     users: savedUsers.length,
+    promoCodes: savedPromoCodes.length,
     withoutPhotos: saveProducts
       .filter((product) => {
         return product.images.length === 0;
@@ -114,7 +120,7 @@ const runSeed = async () => {
     const result = await seedDatabase();
 
     console.log(
-      `Seeded ${result.categories} categories and ${result.products} products and ${result.users} users`,
+      `Seeded ${result.categories} categories and ${result.products} products and ${result.users} users and ${promoCodes} promo codes`,
     );
   } catch (error) {
     console.error("Seed failed:", (error as Error).message);
