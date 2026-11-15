@@ -106,7 +106,7 @@ const reserveStock = async (
 };
 
 // Put stock back (a cancelled order, or a checkout that failed half-way)
-const releaseStock = async (
+export const releaseStock = async (
   lines: { product: Types.ObjectId | string; quantity: number }[],
 ) => {
   if (lines.length === 0) return; // bulkWrite refuses an empty list
@@ -204,7 +204,6 @@ const findMyOrder = async (req: Request<{ orderNumber: string }>) => {
   return order;
 };
 
-
 // ===== Place an order =====
 
 // POST /api/orders
@@ -226,18 +225,28 @@ export const placeOrder = async (req: Request, res: Response) => {
 
   // 2. Load the products. Prices come from the DATABASE, never from the website.
   const ids = [...new Set(cart.map((line) => line.productId))];
-  const found = await Product.find({ $and: [{ _id: { $in: ids } }, liveProducts()] });
-  const products = new Map(found.map((product) => [String(product._id), product]));
+  const found = await Product.find({
+    $and: [{ _id: { $in: ids } }, liveProducts()],
+  });
+  const products = new Map(
+    found.map((product) => [String(product._id), product]),
+  );
 
   if (products.size !== ids.length) {
-    throw new AppError(400, "An item in your cart is no longer available. Please refresh your cart.");
+    throw new AppError(
+      400,
+      "An item in your cart is no longer available. Please refresh your cart.",
+    );
   }
 
   // 3. Build the lines (the price snapshot) and add up how many of each product are wanted
   const wanted = new Map<string, number>(); // the same product in 2 colours = 2 lines, 1 stock check
   const items: IOrderItem[] = cart.map((line) => {
     const product = products.get(line.productId)!;
-    wanted.set(line.productId, (wanted.get(line.productId) ?? 0) + line.quantity);
+    wanted.set(
+      line.productId,
+      (wanted.get(line.productId) ?? 0) + line.quantity,
+    );
 
     return {
       product: product._id,
@@ -278,7 +287,9 @@ export const placeOrder = async (req: Request, res: Response) => {
   // 6. The address: one of my saved ones (addressId), or one typed at checkout (address)
   let shippingAddress;
   if (body.addressId) {
-    const saved = user.addresses.find((a) => String(a._id) === String(body.addressId));
+    const saved = user.addresses.find(
+      (a) => String(a._id) === String(body.addressId),
+    );
     if (!saved) {
       throw new AppError(404, "Address not found");
     }
@@ -290,7 +301,10 @@ export const placeOrder = async (req: Request, res: Response) => {
   }
 
   if (deliveryMethod === "express" && !isLagos(shippingAddress.state)) {
-    throw new AppError(400, "Express Same-Day Dispatch is only available in Lagos.");
+    throw new AppError(
+      400,
+      "Express Same-Day Dispatch is only available in Lagos.",
+    );
   }
   if (paymentMethod === "pay_on_delivery" && !isLagos(shippingAddress.state)) {
     throw new AppError(400, "Pay on Delivery is only available in Lagos.");
@@ -332,7 +346,9 @@ export const placeOrder = async (req: Request, res: Response) => {
     promoCode,
     total,
     status: "processing",
-    statusHistory: [{ status: "processing", note: "Order placed", at: placedAt }],
+    statusHistory: [
+      { status: "processing", note: "Order placed", at: placedAt },
+    ],
     estimatedDelivery: estimateDelivery(deliveryMethod, placedAt),
   });
 
@@ -359,9 +375,15 @@ export const placeOrder = async (req: Request, res: Response) => {
   if (promoCode) {
     await PromoCode.updateOne({ code: promoCode }, { $inc: { usedCount: 1 } });
   }
-  void sendEmail(order.contact.email, `Order #${order.orderNumber} confirmed`, confirmationEmail(order));
+  void sendEmail(
+    order.contact.email,
+    `Order #${order.orderNumber} confirmed`,
+    confirmationEmail(order),
+  );
 
-  res.status(201).json({ message: "Your order has been placed!", ...withCancelInfo(order) });
+  res
+    .status(201)
+    .json({ message: "Your order has been placed!", ...withCancelInfo(order) });
 };
 
 // ===== My orders =====
@@ -398,7 +420,11 @@ export const getMyOrders = async (req: Request, res: Response) => {
     orders,
     // the numbers on the tabs: "All Orders (5)", "In Progress (1)" ...
     counts: {
-      all: counts.processing + counts.shipped + counts.delivered + counts.cancelled,
+      all:
+        counts.processing +
+        counts.shipped +
+        counts.delivered +
+        counts.cancelled,
       "in-progress": counts.processing,
       shipped: counts.shipped,
       delivered: counts.delivered,
@@ -411,11 +437,14 @@ export const getMyOrders = async (req: Request, res: Response) => {
 export const getOrderSummary = async (req: Request, res: Response) => {
   const [counts, recentOrders] = await Promise.all([
     countByStatus(me(req)._id),
-    Order.find({ user: me(req)._id }).sort({ createdAt: -1 }).limit(3),
+    Order.find({ user: me(req)._id })
+      .sort({ createdAt: -1 })
+      .limit(3),
   ]);
 
   res.json({
-    totalOrders: counts.processing + counts.shipped + counts.delivered + counts.cancelled,
+    totalOrders:
+      counts.processing + counts.shipped + counts.delivered + counts.cancelled,
     inProgress: counts.processing + counts.shipped, // not delivered yet
     delivered: counts.delivered,
     recentOrders,
@@ -423,24 +452,36 @@ export const getOrderSummary = async (req: Request, res: Response) => {
 };
 
 // GET /api/orders/:orderNumber
-export const getOrder = async (req: Request<{ orderNumber: string }>, res: Response) => {
+export const getOrder = async (
+  req: Request<{ orderNumber: string }>,
+  res: Response,
+) => {
   res.json(withCancelInfo(await findMyOrder(req)));
 };
 
 // ===== Cancel =====
 
 // PATCH /api/orders/:orderNumber/cancel   { "reason"?: "Ordered the wrong colour" }
-export const cancelOrder = async (req: Request<{ orderNumber: string }>, res: Response) => {
+export const cancelOrder = async (
+  req: Request<{ orderNumber: string }>,
+  res: Response,
+) => {
   const order = await findMyOrder(req);
 
   if (order.status === "cancelled") {
     throw new AppError(400, "This order is already cancelled.");
   }
   if (order.status !== "processing") {
-    throw new AppError(400, "This order has already left our warehouse, so it can't be cancelled. Please contact support.");
+    throw new AppError(
+      400,
+      "This order has already left our warehouse, so it can't be cancelled. Please contact support.",
+    );
   }
   if (!canCancel(order)) {
-    throw new AppError(400, "Free cancellation is only available within 1 hour of placing your order. Please contact support.");
+    throw new AppError(
+      400,
+      "Free cancellation is only available within 1 hour of placing your order. Please contact support.",
+    );
   }
 
   // Change it ONLY if it's still "processing" at this very moment. Pressing Cancel twice quickly would
@@ -453,9 +494,16 @@ export const cancelOrder = async (req: Request<{ orderNumber: string }>, res: Re
         status: "cancelled",
         cancelledAt: now,
         cancelReason: String(req.body?.reason ?? "").trim() || undefined,
-        "payment.status": order.payment.status === "paid" ? "refunded" : order.payment.status,
+        "payment.status":
+          order.payment.status === "paid" ? "refunded" : order.payment.status,
       },
-      $push: { statusHistory: { status: "cancelled", note: "Cancelled by you", at: now } },
+      $push: {
+        statusHistory: {
+          status: "cancelled",
+          note: "Cancelled by you",
+          at: now,
+        },
+      },
     },
     { returnDocument: "after" },
   );
@@ -466,7 +514,10 @@ export const cancelOrder = async (req: Request<{ orderNumber: string }>, res: Re
 
   await releaseStock(cancelled.items); // the items go back on the shelf
   if (cancelled.promoCode) {
-    await PromoCode.updateOne({ code: cancelled.promoCode }, { $inc: { usedCount: -1 } });
+    await PromoCode.updateOne(
+      { code: cancelled.promoCode },
+      { $inc: { usedCount: -1 } },
+    );
   }
 
   void sendEmail(
@@ -484,5 +535,8 @@ export const cancelOrder = async (req: Request<{ orderNumber: string }>, res: Re
     ].join("\n"),
   );
 
-  res.json({ message: "Your order has been cancelled.", ...withCancelInfo(cancelled) });
+  res.json({
+    message: "Your order has been cancelled.",
+    ...withCancelInfo(cancelled),
+  });
 };
