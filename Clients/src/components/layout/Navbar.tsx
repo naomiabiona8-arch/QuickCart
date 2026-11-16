@@ -1,8 +1,10 @@
 import { Link, NavLink } from "react-router-dom";
 import logo from "../../assets/images/Link.png";
-import { MdOutlineLocalMall, MdSearch } from "react-icons/md";
+
 import AccountMenu from "./AccountMenu";
 import { useCart } from "../../context/CartContext";
+import { MdOutlineLocalMall } from "react-icons/md";
+import SearchBox from "./SearchBox";
 
 // The links in the main navigation
 
@@ -53,11 +55,7 @@ const Navbar = () => {
             <label htmlFor="header-search" className="sr-only">
               Search products,brands and categories
             </label>
-            <MdSearch
-              size={21}
-              aria-hidden="true"
-              className="pointer-events-none absolute top-3 left-3.25 text-muted"
-            />
+            <SearchBox />
 
             <input
               id="header-search"
