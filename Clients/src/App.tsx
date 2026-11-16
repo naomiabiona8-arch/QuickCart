@@ -29,6 +29,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import AccountOverviewPage from "./pages/account/AccountOverviewPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedRoute from "./components/auth/ProjectedRoute";
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
                 path="/order-confirmation/:orderId"
                 element={<OrderConfirmationPage />}
               />
+              <Route element={<ProtectedRoute />}></Route>
 
               {/* Account pages: account menu on the left  */}
               <Route path="/account" element={<AccountLayout />}>
@@ -96,10 +98,13 @@ function App() {
                 path="products/:productId/edit"
                 element={<AdminProductsFormPage />}
               />
+
               <Route path="orders" element={<AdminOrdersPage />} />
               <Route path="customers" element={<AdminCustomersPage />} />
               <Route path="categories" element={<AdminCategoriesPage />} />
               <Route path="setting" element={<AdminSettingsPage />} />
+
+              <Route element={<ProtectedRoute adminOnly />}></Route>
 
               {/* Any other admin address shows the 404 page*/}
 
