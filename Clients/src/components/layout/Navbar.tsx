@@ -51,20 +51,7 @@ const Navbar = () => {
 
         {/* Search,cart profile */}
         <div className="flex items-center gap-4">
-          <form role="search" className="relative hidden lg:block ">
-            <label htmlFor="header-search" className="sr-only">
-              Search products,brands and categories
-            </label>
-            <SearchBox />
-
-            <input
-              id="header-search"
-              name="search"
-              type="search"
-              placeholder="Search products, brands and categories..."
-              className="h-12 w-83 rounded-full bg-field pr-4 pl-11.75 text-[13px] text-ink outline-none placeholder:text-muted focus:ring-2 focus:ring-primary/30"
-            />
-          </form>
+          <SearchBox />
 
           <Link
             to="/cart"
