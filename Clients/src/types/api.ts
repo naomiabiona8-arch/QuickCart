@@ -181,3 +181,11 @@ export type OrderResponse = { order: Order; canCancel: boolean; cancelDeadline: 
 
 // GET /api/orders/summary -> the numbers and the 3 newest orders for the My Account overview
 export type OrderSummaryResponse = { totalOrders: number; inProgress: number; delivered: number; recentOrders: Order[] };
+
+// STEP 40: Order History (server: getMyOrders in orderController.ts)
+
+// GET /api/orders -> my orders + the numbers on the tabs
+export type MyOrdersResponse = {
+  orders: Order[];
+  counts: { all: number; "in-progress": number; shipped: number; delivered: number; cancelled: number };
+};
