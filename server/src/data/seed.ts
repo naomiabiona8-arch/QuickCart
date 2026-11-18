@@ -132,7 +132,7 @@ const runSeed = async () => {
     const result = await seedDatabase();
 
     console.log(
-      `Seeded ${result.categories} categories and ${result.products} products and ${result.users} users and ${promoCodes} promo codes and ${result.orders} demo orders`,
+      `Seeded ${result.categories} categories and ${result.products} products and ${result.users} users and ${result.promoCodes} promo codes and ${result.orders} demo orders`,
     );
   } catch (error) {
     console.error("Seed failed:", (error as Error).message);

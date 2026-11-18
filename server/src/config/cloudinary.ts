@@ -18,7 +18,7 @@ export const isCloudinaryReady = Boolean(
 
 // What to do when the cloudinary settings are missing
 export const CLOUDINARY_MISSING =
-  "Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET to server/.env.";
+  "Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET to server/.env./";
 
 cloudinary.config({
   cloud_name: env.cloudinaryCloudName,
