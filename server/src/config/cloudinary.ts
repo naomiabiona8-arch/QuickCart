@@ -131,6 +131,6 @@ export const listProductPhotoIds = async (): Promise<string[]> => {
   } while (nextCursor);
 
   return ids.filter((id) => {
-    return !id.startsWith(`${PHOTO_FOLDER}/`);
+    return !id.startsWith(`${UPLOAD_FOLDER}/`);
   });
 };
