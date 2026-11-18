@@ -12,6 +12,9 @@
     "upload-images": "tsx src/data/uploadImages.ts",
     "start": "node dist/server.js"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
