@@ -4,7 +4,7 @@
 import dns from "node:dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
-import { Router } from "express";
+import { Router, Response, Request } from "express";
 import categoryRoutes from "./categoryRoutes";
 import productRoutes from "./productRoutes";
 import accountRoutes from "./accountRoutes";
@@ -20,7 +20,7 @@ import adminRoutes from "./adminRoutes";
 const router = Router();
 
 // GET /api/health: a quick check that the API is running
-router.get("health", (_req, res) => {
+router.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", message: "QuickCart API is running" });
 });
 
